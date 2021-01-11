@@ -1,93 +1,117 @@
-import random 
+import random
 
-class Card(object): 
-    def __init__(self, suit, value):
+class Card(object):
+    def __init__(self, suit, val):
         self.suit = suit
-        self.value = value 
+        self.value = val
 
-    def __repr__(self): 
-        return f"{self.value} of {self.suit}"
+    # Implementing build in methods so that you can print a card object
+    def __unicode__(self):
+        return self.show()
+    def __str__(self):
+        return self.show()
+    def __repr__(self):
+        return self.show()
+        
+    # Assign 
+    def show(self):
+        """[Cards are valued between 1 and 14. 2 through 10 are literal values. The rest are as described below]
+
+        Returns:
+            [str]: [Returns the suit and value combination]
+        """        
+        if self.value == 1:
+            val = "A" #Ace
+        elif self.value == 11:
+            val = "J" #Jack
+        elif self.value == 12:
+            val = "Q" #Queen
+        elif self.value == 13:
+            val = "K" #King
+        else:
+            val = self.value
+
+        return f"| {self.suit}{val} |"
 
 class Deck(object):
     def __init__(self):
-        self.cards = [Card(s, v) for s in ["Spades", "Clubs", "Hearts", "Diamnods"] for v in ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]]
-
-    def shuffle(self): 
-        if len(self.cards) > 1: 
-            random.shuffle(self.cards) 
-
-    def deal(self): 
-        if len(self.cards) > 1: 
-            return self.cards.pop(0)
-
-class Hand(object):
-    def __init__(self, dealer=False):
-        self.dealer = dealer
         self.cards = []
-        self.value = 0
+        self.build()
 
-    def add_card(self, card):
-        self.cards.append(card) 
-
-    def calculate_value(self):
-        self.value = 0
-        has_ace = False
+    # Display all cards in the deck
+    def show(self):
         for card in self.cards:
-            if card.value.isnumeric():
-                self.value += int(card.value)
+            print(card.show())
+
+    # Generate 52 cards
+    def build(self):
+        self.cards = []
+        for suit in ['♥', '♣', '♦', '♠']:
+            for val in range(1,14):
+                self.cards.append(Card(suit, val))
+
+    # Shuffle the deck
+    def shuffle(self, num=1):
+        length = len(self.cards)
+        for _ in range(num):
+            # This is the fisher yates shuffle algorithm
+            for i in range(length-1, 0, -1):
+                randi = random.randint(0, i)
+                if i == randi:
+                    continue
+                self.cards[i], self.cards[randi] = self.cards[randi], self.cards[i]
+            # You can also use the build in shuffle method
+            # random.shuffle(self.cards)
+
+    # Return the top card
+    def deal(self):
+        return self.cards.pop()
+
+class Player(object):
+    def __init__(self, name):
+        self.name = name
+        self.hand = []
+
+    def sayHello(self):
+        print(f"Hi! My name is {self.name}")
+        return self
+
+    # Draw n number of cards from a deck
+    # Returns true in n cards are drawn, false if less then that
+    def draw(self, deck, num=1):
+        for _ in range(num):
+            card = deck.deal()
+            if card:
+                self.hand.append(card)
             else: 
-                if card.value == "A":
-                    has_ace = True
-                    self.value += 11 
-                else:
-                    self.value += 10 
-
-        if has_ace and self.value > 21: 
-            self.value -= 10 
-        
-    def get_value(self):
-        self.calculate_value()
-        return self.value 
-
-    def display(self):
-        if self.dealer:
-            print("hidden")
-            print(self.cards[1])
-        else:
-            for card in self.cards:
-                print(card)
-            print("Value:". self.get_value())
-
-class Game: 
-    def __init__(self):
-        pass
+                return False
+        return True
     
-    def play(self):
-        playing = True
+    def scoreHand(self):
+        hand_score = 0
+        for card in self.hand:
+            # TODO handle Ace being 1 or 11 
+            hand_score += card.value
+        print(f"Hand score: {hand_score}")
 
-        while playing: 
-            self.deck = Deck()
-            self.deck.shuffle()
+    # Display all the cards in the players hand
+    def showHand(self):
+        print(f"{self.name}'s hand: {self.hand}")
+        return self
 
-            self.player_hand = Hand() 
-            self.dealer_hand = Hand(dealer=True)
+    def discard(self):
+        return self.hand.pop()
 
-            for i in range(2):
-                self.player_hand.add_card(self.deck.deal())
-                self.dealer_hand.add_card(self.deck.deal()) 
-            
-            print("Your hand is:")
-            self.player_hand.display()
-            print()
-            print("Dealer's hand is:")
-            self.dealer_hand.display()
+# Test making a Card
+card = Card('Spades', 6)
+print(card)
 
+# Test making a Deck
+myDeck = Deck()
+myDeck.shuffle()
+# deck.show()
 
-
-
-
-
-
-card1 = Card("Clubs", "6")
-card2 = Card("Hearts", "K")
-print(card1, "\n", card2)
+player = Player("Joe")
+player.sayHello()
+player.draw(myDeck, 2)
+player.showHand()
