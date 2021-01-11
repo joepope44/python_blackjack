@@ -1,5 +1,10 @@
 # Vanity Project to Practice OOP 
 
+With inspiration from:
+
+* [Next Tech](https://medium.com/nexttech/build-a-blackjack-command-line-game-e9d79caefbd7)
+* [Executed Binary](https://www.youtube.com/watch?v=t8YkjDH86Y4)
+
 v1.0
 
 - 1 deck
