@@ -1,4 +1,7 @@
 import random
+from colorama import init, Fore, Back, Style
+init()
+
 
 class Card(object):
     def __init__(self, suit, val):
@@ -15,7 +18,7 @@ class Card(object):
         
     # Assign 
     def show(self):
-        """[Cards are valued between 1 and 14. 2 through 10 are literal values. The rest are as described below]
+        """Cards are valued between 1 and 14. 2 through 10 are literal values. The rest are as described below
 
         Returns:
             [str]: [Returns the suit and value combination]
@@ -31,7 +34,19 @@ class Card(object):
         else:
             val = self.value
 
-        return f"| {self.suit}{val} |"
+        red_col = Fore.RED
+        black_col = Fore.BLACK
+        white_bg = Back.WHITE
+        reset = Style.RESET_ALL
+        
+        # handle red colors on Hearts and Diamonds 
+        if self.suit in ['♥', '♦']:
+            return f"{white_bg}{red_col}| {self.suit}{val} |{reset}"
+
+        # handle black colors for Clubs and Spades
+        else: 
+            return f"{white_bg}{black_col}| {self.suit}{val} |{reset}"
+        
 
 class Deck(object):
     def __init__(self):
@@ -66,6 +81,9 @@ class Deck(object):
     # Return the top card
     def deal(self):
         return self.cards.pop()
+    
+    def cards_left(self): 
+        return len(self.cards)
 
 class Player(object):
     def __init__(self, name):
@@ -90,8 +108,16 @@ class Player(object):
     def scoreHand(self):
         hand_score = 0
         for card in self.hand:
-            # TODO handle Ace being 1 or 11 
-            hand_score += card.value
+            
+            # handle Ace
+            if card.value == 14: 
+                #TODO: handle user input for 1 or 11 
+                hand_score += 11
+            # if card.value is J, Q, K         
+            if card.value > 10:
+                hand_score += 10 
+            else:
+                hand_score += card.value
         print(f"Hand score: {hand_score}")
 
     # Display all the cards in the players hand
@@ -103,8 +129,8 @@ class Player(object):
         return self.hand.pop()
 
 # Test making a Card
-card = Card('Spades', 6)
-print(card)
+# card = Card('Spades', 6)
+# print(card)
 
 # Test making a Deck
 myDeck = Deck()
@@ -115,3 +141,5 @@ player = Player("Joe")
 player.sayHello()
 player.draw(myDeck, 2)
 player.showHand()
+player.scoreHand()
+myDeck.cards_left()
