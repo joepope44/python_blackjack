@@ -4,6 +4,7 @@ With inspiration from:
 
 * [Next Tech](https://medium.com/nexttech/build-a-blackjack-command-line-game-e9d79caefbd7)
 * [Executed Binary](https://www.youtube.com/watch?v=t8YkjDH86Y4)
+* [Blackjack.py](https://github.com/Revanthpn/BlackJack/blob/master/Black_jack.py)
 
 v1.0
 
@@ -12,6 +13,7 @@ v1.0
 - Command Line interface
 - Show probabilties to hit or stand
 - Options to hit or stand only
+- Deploy with Docker? 
 
 v2.0
 

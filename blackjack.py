@@ -2,6 +2,11 @@ import random
 from colorama import init, Fore, Back, Style
 init()
 
+suits = {
+        'Hearts': '♥',
+        'Clubs': '♣',
+        'Spades': '♠',
+        'Diamonds': '♦'} 
 
 class Card(object):
     def __init__(self, suit, val):
@@ -57,13 +62,21 @@ class Deck(object):
     def show(self):
         for card in self.cards:
             print(card.show())
+        
+    # suits = {
+    #     'Hearts': '♥',
+    #     'Clubs': '♣',
+    #     'Spades': '♠',
+    #     'Diamonds': '♦'}  
 
     # Generate 52 cards
     def build(self):
         self.cards = []
-        for suit in ['♥', '♣', '♦', '♠']:
+
+        # for suit in ['♥', '♣', '♦', '♠']:
+        for suit in suits:
             for val in range(1,14):
-                self.cards.append(Card(suit, val))
+                self.cards.append(Card(suits[suit], val))
 
     # Shuffle the deck
     def shuffle(self, num=1):
@@ -140,6 +153,11 @@ myDeck.shuffle()
 player = Player("Joe")
 player.sayHello()
 player.draw(myDeck, 2)
+player.showHand()
+player.scoreHand()
+myDeck.cards_left()
+
+player.draw(myDeck, 1) 
 player.showHand()
 player.scoreHand()
 myDeck.cards_left()
