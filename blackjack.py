@@ -1,12 +1,19 @@
 import random
 from colorama import init, Fore, Back, Style
+import os
+
+# Colorama initialize 
 init()
+
+# This clears the terminal. cls for Windows and clear for unix. 
+os.system('cls||clear')
 
 suits = {
         'Hearts': '♥',
         'Clubs': '♣',
         'Spades': '♠',
-        'Diamonds': '♦'} 
+        'Diamonds': '♦'
+        } 
 
 class Card(object):
     def __init__(self, suit, val):
@@ -63,17 +70,10 @@ class Deck(object):
         for card in self.cards:
             print(card.show())
         
-    # suits = {
-    #     'Hearts': '♥',
-    #     'Clubs': '♣',
-    #     'Spades': '♠',
-    #     'Diamonds': '♦'}  
-
     # Generate 52 cards
     def build(self):
         self.cards = []
 
-        # for suit in ['♥', '♣', '♦', '♠']:
         for suit in suits:
             for val in range(1,14):
                 self.cards.append(Card(suits[suit], val))
@@ -102,9 +102,14 @@ class Player(object):
     def __init__(self, name):
         self.name = name
         self.hand = []
+        self.chips = Chips().total
 
     def sayHello(self):
         print(f"Hi! My name is {self.name}")
+        return self
+    
+    def countChips(self): 
+        print(f"Chip count is: {self.chips}")
         return self
 
     # Draw n number of cards from a deck
@@ -140,24 +145,86 @@ class Player(object):
 
     def discard(self):
         return self.hand.pop()
+    
+    
+class Chips(object):
+    """
+    Player count of chips. All players start with 200
+    """
+    def __init__(self):
+        self.total = 200
+        self.bet = 0    
+
+    def win_bet(self): 
+        self.total +- self.bet 
+        
+    def lose_bet(self):
+        self.total -= self.bet 
+
+# Function definitions 
+
+def take_bet(chips):
+    while True:
+        try:
+            chips.bet = int(input("How many chips would you have to bet : "))
+        except ValueError:
+            print("Oops!, Bet must be an integer! Enter an integer")
+        else:
+            if chips.bet > chips.total:
+                print("Sorry, you don't have enough chips")
+            else:
+                break
+            
+def player_busts(player,dealer,chips):
+    print("Player busts!")
+    chips.lose_bet()
+
+def player_wins(player,dealer,chips):
+    print("Player wins!")
+    chips.win_bet()
+
+def dealer_busts(player,dealer,chips):
+    print("Dealer busts!")
+    chips.win_bet()
+    
+def dealer_wins(player,dealer,chips):
+    print("Dealer wins!")
+    chips.lose_bet()
+    
+def push(player,dealer):
+    print("Dealer and Player tie! It's a push.")
+# GAME PLAY:
+# while True:
+print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
 
 # Test making a Card
 # card = Card('Spades', 6)
 # print(card)
 
-# Test making a Deck
-myDeck = Deck()
-myDeck.shuffle()
-# deck.show()
+# Shuffle the deck 
+Deck = Deck()
+Deck.shuffle()
 
+# Player 1, draws 2 cards 
 player = Player("Joe")
-player.sayHello()
-player.draw(myDeck, 2)
+player.draw(Deck, 2)
 player.showHand()
 player.scoreHand()
-myDeck.cards_left()
+player.countChips()
+print(Deck.cards_left())
 
-player.draw(myDeck, 1) 
-player.showHand()
-player.scoreHand()
-myDeck.cards_left()
+# Dealer draws 2 cards 
+dealer = Player("Dealer")
+dealer.draw(Deck, 2) 
+dealer.showHand()
+dealer.scoreHand()
+print(Deck.cards_left())
+
+
+   
+    
+    # TODO take bet 
+    
+    # TODO show cards 
+    
+    
