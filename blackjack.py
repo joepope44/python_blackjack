@@ -15,6 +15,8 @@ suits = {
         'Diamonds': '♦'
         } 
 
+playing = True 
+
 class Card(object):
     def __init__(self, suit, val):
         self.suit = suit
@@ -59,6 +61,7 @@ class Card(object):
         else: 
             return f"{white_bg}{black_col}| {self.suit}{val} |{reset}"
         
+        
 
 class Deck(object):
     def __init__(self):
@@ -102,15 +105,18 @@ class Player(object):
     def __init__(self, name):
         self.name = name
         self.hand = []
+        self.score = 0 
+        self.aces = 0
+        # self.hand = Hand()
         self.chips = Chips().total
 
     def sayHello(self):
         print(f"Hi! My name is {self.name}")
-        return self
+        # return self
     
     def countChips(self): 
         print(f"Chip count is: {self.chips}")
-        return self
+        # return self
 
     # Draw n number of cards from a deck
     # Returns true in n cards are drawn, false if less then that
@@ -118,34 +124,35 @@ class Player(object):
         for _ in range(num):
             card = deck.deal()
             if card:
+                # for display purposes, build list of cards 
                 self.hand.append(card)
+                # handle various card values to track the hand's score
+                if card.value == 14:  # handle Aces 
+                    self.aces += 1 
+                    self.score += 11
+                elif card.value >= 10: # handle face cards and 10 card 
+                    self.score += 10
+                else:
+                    self.score += card.value
             else: 
                 return False
         return True
     
-    def scoreHand(self):
-        hand_score = 0
-        for card in self.hand:
-            
-            # handle Ace
-            if card.value == 14: 
-                #TODO: handle user input for 1 or 11 
-                hand_score += 11
-            # if card.value is J, Q, K         
-            if card.value > 10:
-                hand_score += 10 
-            else:
-                hand_score += card.value
-        print(f"Hand score: {hand_score}")
-
     # Display all the cards in the players hand
     def showHand(self):
         print(f"{self.name}'s hand: {self.hand}")
-        return self
+        return self.hand
 
     def discard(self):
         return self.hand.pop()
     
+    def adjust_for_ace(self):
+        if self.score > 21 and self.aces > 1: 
+            self.score -= 10 
+            self.aces -= 1     
+
+    def scoreHand(self): 
+        print(f"{self.name} has {self.score} points")   
     
 class Chips(object):
     """
@@ -166,7 +173,7 @@ class Chips(object):
 def take_bet(chips):
     while True:
         try:
-            chips.bet = int(input("How many chips would you have to bet : "))
+            chips.bet = int(input("How many chips would you like to bet : "))
         except ValueError:
             print("Oops!, Bet must be an integer! Enter an integer")
         else:
@@ -174,6 +181,30 @@ def take_bet(chips):
                 print("Sorry, you don't have enough chips")
             else:
                 break
+            
+def hit(deck, hand):
+    hand.add_card(deck.deal())
+    hand.adjust_for_ace()
+
+
+def hit_or_stand(deck,hand):
+    global playing
+    
+    while True:
+        x = input("Would you like to Hit or Stand? Enter 'h' or 's' : ")
+        
+        if x[0].lower() == 'h':
+            hit(deck,hand)
+
+        elif x[0].lower() == 's':
+            print("Player stands. Dealer is playing.")
+            playing = False
+
+        else:
+            print("Sorry, please try again.")
+            continue
+        break            
+
             
 def player_busts(player,dealer,chips):
     print("Player busts!")
@@ -193,38 +224,73 @@ def dealer_wins(player,dealer,chips):
     
 def push(player,dealer):
     print("Dealer and Player tie! It's a push.")
-# GAME PLAY:
-# while True:
-print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
 
 # Test making a Card
 # card = Card('Spades', 6)
 # print(card)
 
-# Shuffle the deck 
-Deck = Deck()
-Deck.shuffle()
+# MAIN GAME LOOP 
+
+# while True: 
+#     print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
+    
+    # Setup gameplay. Create and shuffle the deck. Deal two cards to player. 
+
+    # Shuffle the deck 
+deck = Deck()
+deck.shuffle()
 
 # Player 1, draws 2 cards 
+# player_hand = Hand()
 player = Player("Joe")
-player.draw(Deck, 2)
+
+player.draw(deck, 2)
 player.showHand()
 player.scoreHand()
 player.countChips()
-print(Deck.cards_left())
+print(deck.cards_left())
 
-# Dealer draws 2 cards 
+
+    # Dealer draws 2 cards 
+
 dealer = Player("Dealer")
-dealer.draw(Deck, 2) 
+dealer.draw(deck, 2) 
 dealer.showHand()
 dealer.scoreHand()
-print(Deck.cards_left())
+print(deck.cards_left())
 
+player_chips = Chips()
 
+take_bet(player_chips)
    
+    if player.player_hand.value <= 21:
+        
+        while dealer.scoreHand < 17:
+            hit(deck,dealer)
+            
+              
+        # Test different winning scenarios
+        if dealer.scoreHand > 21:
+            dealer_busts(player_hand,dealer_hand,player_chips)
+
+        elif dealer.scoreHand > player.scoreHand:
+            dealer_wins(player_hand,dealer_hand,player_chips)
+
+        elif dealer.scoreHand < player.scoreHand:
+            player_wins(player_hand,dealer_hand,player_chips)
+
+        else:
+            push(player_hand,dealer_hand)
+
+    # Inform Player of their chips total    
+    print("\nPlayer's winnings stand at",player_chips.total)
     
-    # TODO take bet 
-    
-    # TODO show cards 
-    
+    # Ask to play again
+    new_game = input("Would you like to play another hand? Enter 'y' or 'n' :  ")
+    if new_game[0].lower()=='y':
+        playing=True
+        continue
+    else:
+        print("Thanks for playing!")
+        break
     
