@@ -153,6 +153,9 @@ class Player(object):
 
     def scoreHand(self): 
         print(f"{self.name} has {self.score} points")   
+        
+    def status(self):
+        print(f"{self.hand} \n{self.scoreHand()}")
     
 class Chips(object):
     """
@@ -182,19 +185,18 @@ def take_bet(chips):
             else:
                 break
             
-def hit(deck, hand):
-    hand.add_card(deck.deal())
-    hand.adjust_for_ace()
+def hit(deck, player):
+    player.draw(deck, 1)
+    player.adjust_for_ace()
 
-
-def hit_or_stand(deck,hand):
+def hit_or_stand(deck, player):
     global playing
     
     while True:
         x = input("Would you like to Hit or Stand? Enter 'h' or 's' : ")
         
         if x[0].lower() == 'h':
-            hit(deck,hand)
+            hit(deck, player)
 
         elif x[0].lower() == 's':
             print("Player stands. Dealer is playing.")
@@ -231,56 +233,69 @@ def push(player,dealer):
 
 # MAIN GAME LOOP 
 
-# while True: 
-#     print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
+while True: 
+    print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
     
     # Setup gameplay. Create and shuffle the deck. Deal two cards to player. 
 
     # Shuffle the deck 
-deck = Deck()
-deck.shuffle()
+    deck = Deck()
+    deck.shuffle()
 
-# Player 1, draws 2 cards 
-# player_hand = Hand()
-player = Player("Joe")
+    # Player 1, draws 2 cards 
+    # player = Hand()
+    player = Player("Joe")
+    player.sayHello()
 
-player.draw(deck, 2)
-player.showHand()
-player.scoreHand()
-player.countChips()
-print(deck.cards_left())
-
+    player.draw(deck, 2)
+    player.showHand()
+    player.scoreHand()
+    player.countChips()
+    print(deck.cards_left())
 
     # Dealer draws 2 cards 
 
-dealer = Player("Dealer")
-dealer.draw(deck, 2) 
-dealer.showHand()
-dealer.scoreHand()
-print(deck.cards_left())
+    dealer = Player("Dealer")
+    dealer.draw(deck, 2) 
+    dealer.showHand()
+    dealer.scoreHand()
+    print(deck.cards_left())
 
-player_chips = Chips()
+    player_chips = Chips()
 
-take_bet(player_chips)
-   
-    if player.player_hand.value <= 21:
+    take_bet(player_chips)
+    
+    while playing: 
         
-        while dealer.scoreHand < 17:
+        # Prompt player to hit or stand 
+        hit_or_stand(deck, player)
+        player.status()
+        dealer.status()
+    
+    # If player over 21, then busts 
+    if player.score > 21:
+        player_busts(player, dealer, player_chips)
+        break     
+   
+    # If player has not busted, play Dealer's hand 
+    if player.score <= 21:
+        
+        while dealer.score < 17:
             hit(deck,dealer)
             
               
-        # Test different winning scenarios
-        if dealer.scoreHand > 21:
-            dealer_busts(player_hand,dealer_hand,player_chips)
+            # Test different winning scenarios
+            if dealer.score > 21:
+                dealer_busts(player,dealer,player_chips)
 
-        elif dealer.scoreHand > player.scoreHand:
-            dealer_wins(player_hand,dealer_hand,player_chips)
+            elif dealer.score > player.score:
+                dealer_wins(player,dealer,player_chips)
 
-        elif dealer.scoreHand < player.scoreHand:
-            player_wins(player_hand,dealer_hand,player_chips)
+            elif dealer.score < player.score:
+                player_wins(player,dealer,player_chips)
 
-        else:
-            push(player_hand,dealer_hand)
+            else:
+                push(player,dealer)
 
     # Inform Player of their chips total    
     print("\nPlayer's winnings stand at",player_chips.total)
