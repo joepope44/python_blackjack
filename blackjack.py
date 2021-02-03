@@ -100,7 +100,7 @@ class Deck(object):
         return self.cards.pop()
     
     def cards_left(self): 
-        return len(self.cards)
+        return f"There are {len(self.cards)} cards left in the deck."
 
 class Player(object):
     def __init__(self, name):
@@ -245,6 +245,12 @@ def dealer_wins(player,dealer,chips):
     
 def push(player,dealer):
     print("Dealer and Player tie! It's a push.")
+    
+def reset_hands(player, dealer): 
+    player.score = 0
+    dealer.score = 0
+    player.hand = []
+    dealer.hand = []
 
 
 ####  Begin initial game setup 
@@ -273,6 +279,18 @@ while True:
     dealer.draw(deck, 2) 
     dealer.status()
     
+    # check for blackjack 
+    
+    if player.score == 21 & dealer.score == 21:
+        print(f"{player} and {dealer} have Natural Blackjack")
+        push(player, dealer)
+    elif player.score == 21:
+        print(f"{player} has Natural Blackjack")  
+        player_wins(player, dealer, player_chips)
+    else: 
+        pass 
+    
+    
     while playing: 
         
         # Prompt player to hit or stand 
@@ -280,10 +298,10 @@ while True:
         player.status()
         dealer.status()
     
-    # If player over 21, then busts 
-    if player.score > 21:
-        player_busts(player, dealer, player_chips)
-        break     
+        # If player over 21, then busts 
+        if player.score > 21:
+            player_busts(player, dealer, player_chips)
+            break     
    
     # If player has not busted, play Dealer's hand 
     if player.score <= 21:
@@ -311,8 +329,10 @@ while True:
     print("\nPlayer's winnings stand at",player_chips.total)
     
     # Ask to play again
-    new_game = input("Would you like to play another hand? Enter 'y' or 'n' :  ")
+    new_game = input("Would you like to play another hand? Enter 'y' or 'n' :  \n")
     if new_game[0].lower()=='y':
+        # reset scores to zero and empty all hands. Do not reshuffle deck though. 
+        reset_hands(player, dealer)
         playing=True
         continue
     else:
