@@ -1,6 +1,7 @@
 import random
 from colorama import init, Fore, Back, Style
 import os
+import sys
 
 # Colorama initialize 
 init()
@@ -137,11 +138,6 @@ class Player(object):
             else: 
                 return False
         return True
-    
-    # Display all the cards in the players hand
-    def showHand(self):
-        print(f"{self.name}'s hand: {self.hand}")
-        return self.hand
 
     def discard(self):
         return self.hand.pop()
@@ -150,12 +146,21 @@ class Player(object):
         if self.score > 21 and self.aces > 1: 
             self.score -= 10 
             self.aces -= 1     
-
-    def scoreHand(self): 
-        print(f"{self.name} has {self.score} points")   
         
+    # Display all the cards in the players hand
+    def showHand(self):
+        print(f"{self.name}'s hand: {self.hand}")
+        return self.hand
+
+    # Return score for the player's hand 
+    def scoreHand(self): 
+        print(f"{self.name} has {self.score} points.")   
+        
+    # Run showHand and scoreHand methods 
     def status(self):
-        print(f"{self.hand} \n{self.scoreHand()}")
+        self.showHand()
+        self.scoreHand()
+        print("\n")
     
 class Chips(object):
     """
@@ -175,15 +180,25 @@ class Chips(object):
 
 def take_bet(chips):
     while True:
-        try:
-            chips.bet = int(input("How many chips would you like to bet : "))
-        except ValueError:
-            print("Oops!, Bet must be an integer! Enter an integer")
+        
+        chips.bet = input("How many chips would you like to bet : ")
+        
+        # Hidden menu item to quit
+        if chips.bet[0] == 'q':
+            sys.exit("Quiting Blackjack.py")
         else:
-            if chips.bet > chips.total:
-                print("Sorry, you don't have enough chips")
+            try:
+                chips.bet = int(chips.bet)
+            
+            except ValueError:
+                print("Oops!, Bet must be an integer! Enter an integer")
             else:
-                break
+                if chips.bet > chips.total:
+                    print("Sorry, you don't have enough chips")
+                # Hidden menu item to quit program 
+                
+                else:
+                    break
             
 def hit(deck, player):
     player.draw(deck, 1)
@@ -201,6 +216,10 @@ def hit_or_stand(deck, player):
         elif x[0].lower() == 's':
             print("Player stands. Dealer is playing.")
             playing = False
+        
+        # Hidden menu option to quit game 
+        elif x[0].lower() == 'q':
+            sys.exit("Quitting Blackjack.py") 
 
         else:
             print("Sorry, please try again.")
@@ -227,43 +246,32 @@ def dealer_wins(player,dealer,chips):
 def push(player,dealer):
     print("Dealer and Player tie! It's a push.")
 
-# Test making a Card
-# card = Card('Spades', 6)
-# print(card)
+
+####  Begin initial game setup 
+
+print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
+
+deck = Deck()
+deck.shuffle()
+
+
+player = Player("Joe")
+
+player_chips = Chips()
+player.countChips()
+
+dealer = Player("Dealer")
 
 # MAIN GAME LOOP 
-
 while True: 
-    print('***Welcome to BlackJack!***\n\nGet as close to 21 as you can without going over!\nDealer hits until he reaches 17. Aces count as 1 or 11.\n')
-    
-    # Setup gameplay. Create and shuffle the deck. Deal two cards to player. 
-
-    # Shuffle the deck 
-    deck = Deck()
-    deck.shuffle()
-
-    # Player 1, draws 2 cards 
-    # player = Hand()
-    player = Player("Joe")
-    player.sayHello()
-
-    player.draw(deck, 2)
-    player.showHand()
-    player.scoreHand()
-    player.countChips()
-    print(deck.cards_left())
-
-    # Dealer draws 2 cards 
-
-    dealer = Player("Dealer")
-    dealer.draw(deck, 2) 
-    dealer.showHand()
-    dealer.scoreHand()
-    print(deck.cards_left())
-
-    player_chips = Chips()
 
     take_bet(player_chips)
+
+    player.draw(deck, 2)
+    player.status()
+
+    dealer.draw(deck, 2) 
+    dealer.status()
     
     while playing: 
         
@@ -287,9 +295,11 @@ while True:
             # Test different winning scenarios
             if dealer.score > 21:
                 dealer_busts(player,dealer,player_chips)
+                dealer.status()
 
             elif dealer.score > player.score:
                 dealer_wins(player,dealer,player_chips)
+                dealer.status()
 
             elif dealer.score < player.score:
                 player_wins(player,dealer,player_chips)
